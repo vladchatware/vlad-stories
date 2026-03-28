@@ -1,7 +1,27 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { IconSymbol } from './ui/icon-symbol';
+import {
+  Button,
+  GlassEffectContainer,
+  HStack,
+  Image,
+  RoundedRectangle,
+  Text,
+  VStack,
+  ZStack,
+} from '@expo/ui/swift-ui';
+import {
+  buttonStyle,
+  fixedSize,
+  font,
+  foregroundStyle,
+  frame,
+  glassEffect,
+  lineLimit,
+  monospacedDigit,
+  padding,
+} from '@expo/ui/swift-ui/modifiers';
 import { Colors } from '@/constants/theme';
+import { getStoryDetail } from '@/constants/story-details';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 const THUMBNAIL_ASPECT_RATIO = 1.14;
@@ -25,119 +45,186 @@ export function DiscoverStoryTile({ item, width }: DiscoverStoryTileProps) {
   const router = useRouter();
   const theme = useColorScheme() === 'dark' ? 'dark' : 'light';
   const colors = Colors[theme];
-  const cardStyle = StyleSheet.flatten([styles.card, { width }]);
+  const story = getStoryDetail(item.id);
+  const imageHeight = width / THUMBNAIL_ASPECT_RATIO;
 
   return (
-    <TouchableOpacity activeOpacity={0.92} style={cardStyle} onPress={() => router.push(`/story/${item.id}`)}>
-      <View style={[styles.imageCard, { backgroundColor: colors.card }]}>
-        <View style={[styles.imagePlaceholder, { backgroundColor: colors.placeholder }]} />
+    <Button
+      onPress={() => router.push(`/story/${item.id}`)}
+      modifiers={[buttonStyle('plain'), frame({ width, alignment: 'leading' })]}>
+      <VStack spacing={10} alignment="leading" modifiers={[frame({ width, alignment: 'leading' })]}>
+        <ZStack alignment="bottom" modifiers={[frame({ width, height: imageHeight, alignment: 'leading' })]}>
+          <RoundedRectangle
+            cornerRadius={24}
+            modifiers={[
+              frame({ width, height: imageHeight }),
+              foregroundStyle(
+                story
+                  ? {
+                      type: 'linearGradient',
+                      colors: story.cover.colors,
+                      startPoint: { x: 0, y: 0 },
+                      endPoint: { x: 1, y: 1 },
+                    }
+                  : colors.card
+              ),
+            ]}
+          />
 
-        <View style={styles.overlayFooter}>
-          <View style={styles.overlayStack}>
-            <View style={styles.metricsRow}>
-              <View style={[styles.metricPill, { backgroundColor: colors.overlay }]}>
-                <IconSymbol size={14} name="eye.fill" color={colors.text} />
-                <Text style={[styles.metricText, { color: colors.text }]}>{item.views}</Text>
-              </View>
+          <RoundedRectangle
+            cornerRadius={24}
+            modifiers={[
+              frame({ width: width - 10, height: imageHeight - 10 }),
+              foregroundStyle({
+                type: 'linearGradient',
+                colors: ['rgba(255,255,255,0.12)', 'rgba(255,255,255,0.02)'],
+                startPoint: { x: 0, y: 0 },
+                endPoint: { x: 1, y: 1 },
+              }),
+            ]}
+          />
 
-              <View style={[styles.metricPill, { backgroundColor: colors.overlay }]}>
-                <IconSymbol size={14} name="heart.fill" color="#D14B83" />
-                <Text style={[styles.metricText, { color: colors.text }]}>{item.likes}</Text>
-              </View>
-            </View>
+          <VStack
+            spacing={8}
+            alignment="leading"
+            modifiers={[frame({ maxWidth: Infinity, maxHeight: Infinity, alignment: 'bottom' }), padding({ horizontal: 12, bottom: 12 })]}>
+            <MetaBar views={item.views} likes={item.likes} />
+            {item.progressLabel || item.progress !== undefined ? (
+              <ProgressMeta progressLabel={item.progressLabel} progress={item.progress} />
+            ) : null}
+          </VStack>
+        </ZStack>
 
-            {(item.progressLabel || item.progress !== undefined) && (
-              <View style={styles.progressRow}>
-                {item.progressLabel ? (
-                  <Text style={[styles.progressText, { color: colors.text }]}>{item.progressLabel}</Text>
-                ) : (
-                  <View />
-                )}
+        <VStack
+          spacing={6}
+          alignment="leading"
+          modifiers={[
+            frame({ width, alignment: 'leading' }),
+            padding({ horizontal: 2, vertical: 2 }),
+          ]}>
+          <Text
+            modifiers={[
+              font({ size: 12, weight: 'regular', design: 'rounded' }),
+              foregroundStyle(colors.secondaryText),
+              lineLimit(1),
+            ]}>
+            {item.author}
+          </Text>
 
-                {item.progress !== undefined && (
-                  <Text style={[styles.progressText, { color: colors.text }]}>{`${item.progress}%`}</Text>
-                )}
-              </View>
-            )}
-          </View>
-        </View>
-      </View>
-
-      <View style={styles.copyHost}>
-        <Text style={[styles.authorText, { color: colors.secondaryText }]} numberOfLines={1}>
-          {item.author}
-        </Text>
-
-        <Text style={[styles.titleText, { color: colors.text }]} numberOfLines={2}>
-          {item.title}
-        </Text>
-      </View>
-    </TouchableOpacity>
+          <Text
+            modifiers={[
+              font({ size: 17, weight: 'bold', design: 'rounded' }),
+              foregroundStyle(colors.text),
+              lineLimit(2),
+              fixedSize({ horizontal: false, vertical: true }),
+              frame({ maxWidth: Infinity, alignment: 'leading' }),
+            ]}>
+            {item.title}
+          </Text>
+        </VStack>
+      </VStack>
+    </Button>
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    gap: 12,
-  },
-  imageCard: {
-    aspectRatio: THUMBNAIL_ASPECT_RATIO,
-    borderRadius: 20,
-    overflow: 'hidden',
-  },
-  imagePlaceholder: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  overlayFooter: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    paddingHorizontal: 12,
-    paddingBottom: 12,
-    gap: 10,
-  },
-  overlayStack: {
-    gap: 10,
-  },
-  metricsRow: {
-    flexDirection: 'row',
-    gap: 10,
-    justifyContent: 'space-between',
-  },
-  metricPill: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  metricText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  progressRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  progressText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  copyHost: {
-    gap: 6,
-    minHeight: 64,
-  },
-  authorText: {
-    fontSize: 12,
-  },
-  titleText: {
-    fontSize: 17,
-    fontWeight: '700',
-    minHeight: 52,
-  },
-});
+function MetaBar({
+  views,
+  likes,
+}: {
+  views: string;
+  likes: string;
+}) {
+  const theme = useColorScheme() === 'dark' ? 'dark' : 'light';
+  const colors = Colors[theme];
+
+  return (
+    <GlassEffectContainer spacing={12}>
+      <HStack
+        spacing={8}
+        alignment="center"
+        modifiers={[
+          frame({ maxWidth: Infinity, alignment: 'leading' }),
+          padding({ horizontal: 10, vertical: 8 }),
+          glassEffect({
+            glass: {
+              variant: 'clear',
+              tint: colors.glassTint,
+            },
+            shape: 'capsule',
+          }),
+        ]}>
+        <Image systemName="eye.fill" size={14} color={colors.text} />
+        <Text
+          modifiers={[
+            font({ size: 11, weight: 'semibold', design: 'rounded' }),
+            foregroundStyle(colors.text),
+            monospacedDigit(),
+            lineLimit(1),
+            fixedSize({ horizontal: true, vertical: false }),
+          ]}>
+          {views}
+        </Text>
+
+        <Text
+          modifiers={[
+            font({ size: 11, weight: 'medium', design: 'rounded' }),
+            foregroundStyle(colors.secondaryText),
+            fixedSize({ horizontal: true, vertical: false }),
+          ]}>
+          ·
+        </Text>
+
+        <Image systemName="heart.fill" size={14} color="#D14B83" />
+        <Text
+          modifiers={[
+            font({ size: 11, weight: 'semibold', design: 'rounded' }),
+            foregroundStyle(colors.text),
+            monospacedDigit(),
+            lineLimit(1),
+            fixedSize({ horizontal: true, vertical: false }),
+          ]}>
+          {likes}
+        </Text>
+      </HStack>
+    </GlassEffectContainer>
+  );
+}
+
+function ProgressMeta({
+  progressLabel,
+  progress,
+}: {
+  progressLabel?: string;
+  progress?: number;
+}) {
+  const theme = useColorScheme() === 'dark' ? 'dark' : 'light';
+  const colors = Colors[theme];
+
+  return (
+    <HStack spacing={6} alignment="center">
+      {progressLabel ? (
+        <Text
+          modifiers={[
+            font({ size: 11, weight: 'medium', design: 'rounded' }),
+            foregroundStyle(colors.specularHighlight),
+            lineLimit(1),
+            fixedSize({ horizontal: true, vertical: false }),
+          ]}>
+          {progressLabel}
+        </Text>
+      ) : null}
+      {progress !== undefined ? (
+        <Text
+          modifiers={[
+            font({ size: 11, weight: 'semibold', design: 'rounded' }),
+            foregroundStyle(colors.specularHighlight),
+            monospacedDigit(),
+            lineLimit(1),
+            fixedSize({ horizontal: true, vertical: false }),
+          ]}>
+          {`${progress}%`}
+        </Text>
+      ) : null}
+    </HStack>
+  );
+}

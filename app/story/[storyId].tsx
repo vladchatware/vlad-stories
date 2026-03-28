@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native';
-import { Host, Button, HStack, ScrollView, Spacer, Text, VStack, ZStack, Image, Circle } from '@expo/ui/swift-ui';
+import { Host, Button, GlassEffectContainer, HStack, ScrollView, Spacer, Text, VStack, ZStack, Image, Circle } from '@expo/ui/swift-ui';
 import {
   background,
   buttonStyle,
@@ -15,9 +15,11 @@ import {
   padding,
   scrollContentBackground,
   shapes,
+  glassEffect,
 } from '@expo/ui/swift-ui/modifiers';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { NavigationBackButton } from '@/components/navigation-back-button';
 import { StoryCoverArt } from '@/components/story-cover-art';
 import { Colors } from '@/constants/theme';
 import { getStoryDetail } from '@/constants/story-details';
@@ -32,14 +34,16 @@ export default function StoryDetailScreen() {
   const story = getStoryDetail(storyId);
 
   const backgroundColor = theme === 'dark' ? '#0F1321' : '#F6F1EA';
-  const panelColor = theme === 'dark' ? '#1A2133' : '#E9E0D3';
-  const chipColor = theme === 'dark' ? '#1D2437' : '#E7DECF';
-  const chipTextColor = theme === 'dark' ? '#D9E0F2' : '#4E576F';
   const secondaryTextColor = theme === 'dark' ? '#8B93AB' : '#7A7487';
   const bodyColor = theme === 'dark' ? '#A4ADC2' : '#666E84';
   const footerButtonTextColor = '#FFF6F9';
   const footerHorizontalInset = 22;
   const footerBottomInset = 18;
+  const footerControlSize = 48;
+  const footerChromeVerticalPadding = 10;
+  const footerScrollGap = 52;
+  const footerDockHeight = footerControlSize + footerChromeVerticalPadding * 2;
+  const footerScrollBottomClearance = footerDockHeight + footerScrollGap;
 
   if (!story) {
     return (
@@ -99,24 +103,13 @@ export default function StoryDetailScreen() {
               modifiers={[
                 frame({ maxWidth: Infinity, alignment: 'leading' }),
                 padding({
-                  top: 0,
-                  bottom: insets.bottom + 120,
+                  top: insets.top,
+                  bottom: insets.bottom + footerScrollBottomClearance,
                   horizontal: 18,
                 }),
               ]}>
               <HStack spacing={12} alignment="center" modifiers={[frame({ maxWidth: Infinity, alignment: 'leading' })]}>
-                <Button
-                  onPress={() => router.back()}
-                  modifiers={[
-                    buttonStyle('plain'),
-                    padding({ horizontal: 6, vertical: 6 }),
-                  ]}>
-                  <Image
-                    systemName="chevron.left"
-                    size={18}
-                    color={colors.text}
-                  />
-                </Button>
+                <NavigationBackButton color={colors.text} onPress={() => router.back()} />
 
                 <Spacer />
 
@@ -160,24 +153,26 @@ export default function StoryDetailScreen() {
               </VStack>
 
               <VStack
-                spacing={6}
+                spacing={10}
                 alignment="leading"
                 modifiers={[
                   frame({ maxWidth: Infinity, alignment: 'leading' }),
                 ]}>
-                <HStack spacing={8} alignment="center" modifiers={[frame({ maxWidth: Infinity, alignment: 'center' })]}>
-                  <MetricChip icon="heart.fill" text={`${story.likes} likes`} accentColor={story.accentColor} chipColor={chipColor} textColor={chipTextColor} />
-                  <MetricChip icon="clock.fill" text={story.durationLabel} chipColor={chipColor} textColor={chipTextColor} />
-                  <MetricChip icon="eye.fill" text={story.views} chipColor={chipColor} textColor={chipTextColor} />
-                </HStack>
+                <StoryMetaPanel
+                  likes={story.likes}
+                  durationLabel={story.durationLabel}
+                  views={story.views}
+                  accentColor={story.accentColor}
+                />
 
                 <HStack spacing={8} alignment="center" modifiers={[frame({ maxWidth: Infinity, alignment: 'center' })]}>
-                  {story.tags.map((tag) => (
+                  {story.tags.slice(0, 3).map((tag) => (
                     <TagChip
                       key={`${story.id}-${tag.label}`}
                       label={tag.label}
-                      backgroundColor={tag.tone === 'accent' ? story.accentColor : chipColor}
-                      textColor={tag.tone === 'accent' ? '#FFF5F8' : chipTextColor}
+                      accent={tag.tone === 'accent'}
+                      accentColor={story.accentColor}
+                      textColor={secondaryTextColor}
                     />
                   ))}
                 </HStack>
@@ -219,45 +214,62 @@ export default function StoryDetailScreen() {
             modifiers={[
               frame({ maxWidth: Infinity, maxHeight: Infinity, alignment: 'bottom' }),
               padding({
-                bottom: insets.bottom > 0 ? Math.max(10, insets.bottom - 6) : footerBottomInset,
+                bottom: insets.bottom > 0 ? Math.max(14, insets.bottom - 2) : footerBottomInset,
                 horizontal: footerHorizontalInset,
               }),
             ]}>
             <HStack spacing={10} alignment="center">
-              <Button
-                modifiers={[
-                  buttonStyle('plain'),
-                  frame({ width: 48, height: 48 }),
-                  background(panelColor, shapes.roundedRectangle({ cornerRadius: 15 })),
-                ]}>
-                <Image systemName="heart" size={18} color={story.accentColor} />
-              </Button>
-
-              <Button
-                onPress={() => router.push(`/chat?itemId=${story.id}`)}
-                modifiers={[
-                  buttonStyle('plain'),
-                  frame({ maxWidth: Infinity }),
-                  padding({ horizontal: 20, vertical: 15 }),
-                  background(story.accentColor, shapes.capsule()),
-                ]}>
-                <HStack spacing={8} alignment="center">
-                  <Image
-                    systemName={story.progressPercent !== undefined ? 'play.fill' : 'lock.fill'}
-                    size={13}
-                    color={footerButtonTextColor}
-                  />
-                  <Text
+              <GlassEffectContainer spacing={14}>
+                <HStack
+                  spacing={10}
+                  alignment="center"
+                  modifiers={[
+                    frame({ maxWidth: Infinity, alignment: 'leading' }),
+                    padding({ horizontal: 10, vertical: 10 }),
+                    glassEffect({
+                      glass: {
+                        variant: 'regular',
+                        tint: colors.glassTint,
+                      },
+                      shape: 'roundedRectangle',
+                      cornerRadius: 30,
+                    }),
+                  ]}>
+                  <Button
                     modifiers={[
-                      font({ size: 14, weight: 'bold', design: 'rounded' }),
-                      kerning(0.4),
-                      foregroundStyle(footerButtonTextColor),
-                      lineLimit(1),
+                      buttonStyle('glass'),
+                      frame({ width: 48, height: 48 }),
                     ]}>
-                    {primaryActionLabel.toUpperCase()}
-                  </Text>
+                    <Image systemName="heart" size={18} color={story.accentColor} />
+                  </Button>
+
+                  <Button
+                    onPress={() => router.push(`/chat?itemId=${story.id}`)}
+                    modifiers={[
+                      buttonStyle('plain'),
+                      frame({ maxWidth: Infinity }),
+                      padding({ horizontal: 20, vertical: 15 }),
+                      background(story.accentColor, shapes.capsule()),
+                    ]}>
+                    <HStack spacing={8} alignment="center">
+                      <Image
+                        systemName={story.progressPercent !== undefined ? 'play.fill' : 'lock.fill'}
+                        size={13}
+                        color={footerButtonTextColor}
+                      />
+                      <Text
+                        modifiers={[
+                          font({ size: 14, weight: 'bold', design: 'rounded' }),
+                          kerning(0.4),
+                          foregroundStyle(footerButtonTextColor),
+                          lineLimit(1),
+                        ]}>
+                        {primaryActionLabel.toUpperCase()}
+                      </Text>
+                    </HStack>
+                  </Button>
                 </HStack>
-              </Button>
+              </GlassEffectContainer>
             </HStack>
           </VStack>
         </ZStack>
@@ -266,55 +278,115 @@ export default function StoryDetailScreen() {
   );
 }
 
-interface MetricChipProps {
-  icon: string;
-  text: string;
-  chipColor: string;
-  textColor: string;
-  accentColor?: string;
-}
+function StoryMetaPanel({
+  likes,
+  durationLabel,
+  views,
+  accentColor,
+}: {
+  likes: string;
+  durationLabel: string;
+  views: string;
+  accentColor: string;
+}) {
+  const theme = useColorScheme() === 'dark' ? 'dark' : 'light';
+  const colors = Colors[theme];
 
-function MetricChip({ icon, text, chipColor, textColor, accentColor }: MetricChipProps) {
   return (
-    <HStack
-      spacing={6}
-      alignment="center"
-      modifiers={[
-        padding({ horizontal: 13, vertical: 9 }),
-        background(chipColor, shapes.capsule()),
-      ]}>
-      <Image systemName={icon as never} size={12} color={accentColor ?? textColor} />
-      <Text
+    <GlassEffectContainer spacing={12}>
+      <HStack
+        spacing={10}
+        alignment="center"
         modifiers={[
-          font({ size: 12, weight: 'semibold', design: 'rounded' }),
-          foregroundStyle(textColor),
-          fixedSize({ horizontal: true, vertical: true }),
+          frame({ maxWidth: Infinity, alignment: 'center' }),
+          padding({ horizontal: 14, vertical: 10 }),
+          glassEffect({
+            glass: {
+              variant: 'clear',
+              tint: colors.glassTint,
+            },
+            shape: 'capsule',
+          }),
         ]}>
-        {text}
-      </Text>
-    </HStack>
+        <Image systemName="heart.fill" size={12} color={accentColor} />
+        <Text
+          modifiers={[
+            font({ size: 12, weight: 'semibold', design: 'rounded' }),
+            foregroundStyle(colors.text),
+            fixedSize({ horizontal: true, vertical: true }),
+          ]}>
+          {likes}
+        </Text>
+
+        <Text
+          modifiers={[
+            font({ size: 12, weight: 'medium', design: 'rounded' }),
+            foregroundStyle(secondaryTone(colors)),
+            fixedSize({ horizontal: true, vertical: true }),
+          ]}>
+          ·
+        </Text>
+
+        <Image systemName="clock.fill" size={12} color={secondaryTone(colors)} />
+        <Text
+          modifiers={[
+            font({ size: 12, weight: 'semibold', design: 'rounded' }),
+            foregroundStyle(colors.text),
+            fixedSize({ horizontal: true, vertical: true }),
+          ]}>
+          {durationLabel}
+        </Text>
+
+        <Text
+          modifiers={[
+            font({ size: 12, weight: 'medium', design: 'rounded' }),
+            foregroundStyle(secondaryTone(colors)),
+            fixedSize({ horizontal: true, vertical: true }),
+          ]}>
+          ·
+        </Text>
+
+        <Image systemName="eye.fill" size={12} color={secondaryTone(colors)} />
+        <Text
+          modifiers={[
+            font({ size: 12, weight: 'semibold', design: 'rounded' }),
+            foregroundStyle(colors.text),
+            fixedSize({ horizontal: true, vertical: true }),
+          ]}>
+          {views}
+        </Text>
+      </HStack>
+    </GlassEffectContainer>
   );
 }
 
 interface TagChipProps {
   label: string;
-  backgroundColor: string;
+  accent?: boolean;
+  accentColor: string;
   textColor: string;
 }
 
-function TagChip({ label, backgroundColor, textColor }: TagChipProps) {
+function TagChip({ label, accent, accentColor, textColor }: TagChipProps) {
+  const theme = useColorScheme() === 'dark' ? 'dark' : 'light';
+  const colors = Colors[theme];
+
   return (
     <Text
       modifiers={[
-        font({ size: 12, weight: 'bold', design: 'rounded' }),
-        foregroundStyle(textColor),
+        font({ size: 12, weight: accent ? 'bold' : 'medium', design: 'rounded' }),
+        foregroundStyle(accent ? '#FFF6FB' : textColor),
         padding({ horizontal: 14, vertical: 8 }),
-        background(backgroundColor, shapes.capsule()),
+        background(accent ? accentColor : colors.glassThin, shapes.capsule()),
         fixedSize({ horizontal: true, vertical: true }),
       ]}>
       {label}
     </Text>
   );
+}
+
+function secondaryTone(colors: (typeof Colors)['light']) {
+  return colors.secondaryText;
 }
 
 const styles = StyleSheet.create({

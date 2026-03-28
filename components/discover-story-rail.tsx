@@ -1,11 +1,18 @@
-import { Dimensions, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Dimensions } from 'react-native';
+import { Button, HStack, Image, ScrollView, Spacer, Text, VStack } from '@expo/ui/swift-ui';
+import {
+  buttonStyle,
+  font,
+  foregroundStyle,
+  frame,
+  padding,
+} from '@expo/ui/swift-ui/modifiers';
 import { DiscoverStoryTile, DiscoverStoryTileItem } from './discover-story-tile';
-import { IconSymbol } from './ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 const { width } = Dimensions.get('window');
-const CARD_WIDTH = Math.min(width * 0.42, 240);
+const CARD_WIDTH = Math.min(width * 0.38, 220);
 
 interface DiscoverStoryRailProps {
   title: string;
@@ -17,57 +24,45 @@ export function DiscoverStoryRail({ title, items }: DiscoverStoryRailProps) {
   const colors = Colors[theme];
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={[styles.headingText, { color: colors.text }]}>{title}</Text>
+    <VStack spacing={16} alignment="leading">
+      <HStack
+        spacing={12}
+        alignment="center"
+        modifiers={[frame({ maxWidth: Infinity, alignment: 'leading' }), padding({ horizontal: 20 })]}>
+        <Text
+          modifiers={[
+            font({ size: 25, weight: 'bold', design: 'rounded' }),
+            foregroundStyle(colors.text),
+          ]}>
+          {title}
+        </Text>
 
-        <Pressable style={styles.actionRow}>
-          <Text style={[styles.actionText, { color: colors.secondaryText }]}>Show All</Text>
-          <IconSymbol size={20} name="chevron.right" color={colors.secondaryText} />
-        </Pressable>
-      </View>
+        <Spacer />
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}>
-        {items.map((item) => (
-          <DiscoverStoryTile key={item.id} item={item} width={CARD_WIDTH} />
-        ))}
+        <Button modifiers={[buttonStyle('plain')]}>
+          <HStack spacing={6} alignment="center">
+            <Text
+              modifiers={[
+                font({ size: 14, weight: 'semibold', design: 'rounded' }),
+                foregroundStyle(colors.secondaryText),
+              ]}>
+              Show All
+            </Text>
+            <Image systemName="chevron.right" size={16} color={colors.secondaryText} />
+          </HStack>
+        </Button>
+      </HStack>
+
+      <ScrollView axes="horizontal" showsIndicators={false}>
+        <HStack
+          spacing={18}
+          alignment="top"
+          modifiers={[padding({ horizontal: 20, top: 8, bottom: 10 })]}>
+          {items.map((item) => (
+            <DiscoverStoryTile key={item.id} item={item} width={CARD_WIDTH} />
+          ))}
+        </HStack>
       </ScrollView>
-    </View>
+    </VStack>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    gap: 18,
-  },
-  header: {
-    paddingHorizontal: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  headingText: {
-    fontSize: 24,
-    fontWeight: '700',
-    flexShrink: 1,
-  },
-  actionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  actionText: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-    gap: 16,
-  },
-  scrollView: {},
-});

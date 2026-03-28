@@ -1,8 +1,27 @@
-import { DimensionValue, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { Host, Text, VStack } from '@expo/ui/swift-ui';
-import { font, foregroundStyle, lineLimit } from '@expo/ui/swift-ui/modifiers';
+import { StyleSheet, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
+import {
+  GlassEffectContainer,
+  Host,
+  HStack,
+  RoundedRectangle,
+  Spacer,
+  Text,
+  VStack,
+  ZStack,
+} from '@expo/ui/swift-ui';
+import {
+  fixedSize,
+  font,
+  foregroundStyle,
+  frame,
+  glassEffect,
+  lineLimit,
+  monospacedDigit,
+  padding,
+} from '@expo/ui/swift-ui/modifiers';
 import { Colors } from '@/constants/theme';
+import { getStoryDetail } from '@/constants/story-details';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 interface StoryItem {
@@ -19,99 +38,170 @@ interface StoryCardProps {
   showProgress?: boolean;
 }
 
+const CARD_IMAGE_HEIGHT = 196;
+
 export function StoryCard({ item, width, showProgress }: StoryCardProps) {
   const router = useRouter();
-  const theme = genreThemes[item.genre] ?? genreThemes.default;
   const colorScheme = useColorScheme() === 'dark' ? 'dark' : 'light';
   const colors = Colors[colorScheme];
-  const cardStyle = StyleSheet.flatten([styles.card, { width }]);
+  const story = getStoryDetail(item.id);
+  const progress = story?.progressPercent ?? item.progress;
 
   return (
-    <TouchableOpacity activeOpacity={0.9} style={cardStyle} onPress={() => router.push(`/story/${item.id}`)}>
-      <View style={[styles.cardImage, { backgroundColor: colors.placeholder }]} />
-      <View style={styles.cardContent}>
-        <Host style={[styles.titleHost, { backgroundColor: colors.background }]}>
-          <VStack spacing={4}>
-            <Text modifiers={[font({ size: 16, weight: 'bold', design: 'rounded' }), lineLimit(2)]}>
-              {item.title}
-            </Text>
+    <TouchableOpacity activeOpacity={0.92} style={[styles.card, { width }]} onPress={() => router.push(`/story/${item.id}`)}>
+      <Host style={styles.host}>
+        <VStack spacing={12} alignment="leading" modifiers={[frame({ width, alignment: 'leading' })]}>
+          <ZStack alignment="bottomLeading" modifiers={[frame({ width, height: CARD_IMAGE_HEIGHT, alignment: 'leading' })]}>
+            <RoundedRectangle
+              cornerRadius={24}
+              modifiers={[
+                frame({ width, height: CARD_IMAGE_HEIGHT }),
+                foregroundStyle(
+                  story
+                    ? {
+                        type: 'linearGradient',
+                        colors: story.cover.colors,
+                        startPoint: { x: 0, y: 0 },
+                        endPoint: { x: 1, y: 1 },
+                      }
+                    : colors.card
+                ),
+              ]}
+            />
+
+            <RoundedRectangle
+              cornerRadius={20}
+              modifiers={[
+                frame({ width: width - 10, height: CARD_IMAGE_HEIGHT - 10 }),
+                foregroundStyle({
+                  type: 'linearGradient',
+                  colors: ['rgba(255,255,255,0.12)', 'rgba(255,255,255,0.02)'],
+                  startPoint: { x: 0, y: 0 },
+                  endPoint: { x: 1, y: 1 },
+                }),
+              ]}
+            />
+
+            <VStack
+              spacing={0}
+              alignment="leading"
+              modifiers={[
+                frame({ maxWidth: Infinity, maxHeight: Infinity, alignment: 'bottomLeading' }),
+                padding({ horizontal: 12, bottom: 12 }),
+              ]}>
+              <StoryMetaCapsule
+                genre={item.genre}
+                showProgress={showProgress}
+                progress={progress}
+              />
+            </VStack>
+          </ZStack>
+
+          <VStack spacing={5} alignment="leading" modifiers={[padding({ horizontal: 2 })]}>
             <Text
               modifiers={[
-                font({ size: 12 }),
-                foregroundStyle({ type: 'hierarchical', style: 'secondary' }),
+                font({ size: 12, weight: 'regular', design: 'rounded' }),
+                foregroundStyle(colors.secondaryText),
                 lineLimit(1),
               ]}>
-              {`by ${item.author}`}
+              {item.author}
+            </Text>
+
+            <Text
+              modifiers={[
+                font({ size: 17, weight: 'bold', design: 'rounded' }),
+                foregroundStyle(colors.text),
+                lineLimit(2),
+                fixedSize({ horizontal: false, vertical: true }),
+                frame({ maxWidth: Infinity, alignment: 'leading' }),
+              ]}>
+              {item.title}
             </Text>
           </VStack>
-        </Host>
-        {showProgress && item.progress !== undefined && (
-          <View style={styles.progressContainer}>
-            <View style={[styles.progressTrack, { backgroundColor: colors.cardMuted }]}>
-              <View
-                style={[
-                  styles.progressBar,
-                  { width: `${item.progress}%` as DimensionValue, backgroundColor: theme.glow },
-                ]}
-              />
-            </View>
-            <Host style={[styles.progressHost, { backgroundColor: colors.background }]}>
-              <Text
-                modifiers={[
-                  font({ size: 11, weight: 'medium' }),
-                  foregroundStyle({ type: 'hierarchical', style: 'secondary' }),
-                  lineLimit(1),
-                ]}>
-                {`${item.progress}% completed`}
-              </Text>
-            </Host>
-          </View>
-        )}
-      </View>
+        </VStack>
+      </Host>
     </TouchableOpacity>
   );
 }
 
-const genreThemes: Record<string, { glow: string }> = {
-  Fantasy: { glow: '#7D5FFF' },
-  'Sci-Fi': { glow: '#2AA7C8' },
-  Mystery: { glow: '#6D7D95' },
-  Adventure: { glow: '#58A36C' },
-  Thriller: { glow: '#D96C49' },
-  Romance: { glow: '#E06C9F' },
-  Horror: { glow: '#7A5DC7' },
-  Cyberpunk: { glow: '#4A7BD8' },
-  Drama: { glow: '#D8943B' },
-  default: { glow: '#7393B3' },
-};
+function StoryMetaCapsule({
+  genre,
+  showProgress,
+  progress,
+}: {
+  genre: string;
+  showProgress?: boolean;
+  progress?: number;
+}) {
+  const colorScheme = useColorScheme() === 'dark' ? 'dark' : 'light';
+  const colors = Colors[colorScheme];
+
+  return (
+    <GlassEffectContainer spacing={12}>
+      <HStack
+        spacing={8}
+        alignment="center"
+        modifiers={[
+          frame({ maxWidth: Infinity, alignment: 'leading' }),
+          padding({ horizontal: 11, vertical: 8 }),
+          glassEffect({
+            glass: {
+              variant: 'clear',
+              tint: colors.glassTint,
+            },
+            shape: 'capsule',
+          }),
+        ]}>
+        <Text
+          modifiers={[
+            font({ size: 11, weight: 'medium', design: 'rounded' }),
+            foregroundStyle(colors.text),
+            lineLimit(1),
+            fixedSize({ horizontal: true, vertical: false }),
+          ]}>
+          {genre}
+        </Text>
+
+        {showProgress && progress !== undefined ? (
+          <>
+            <Text
+              modifiers={[
+                font({ size: 11, weight: 'medium', design: 'rounded' }),
+                foregroundStyle(colors.secondaryText),
+                fixedSize({ horizontal: true, vertical: false }),
+              ]}>
+              ·
+            </Text>
+            <Spacer />
+            <Text
+              modifiers={[
+                font({ size: 11, weight: 'medium', design: 'rounded' }),
+                foregroundStyle(colors.text),
+                fixedSize({ horizontal: true, vertical: false }),
+              ]}>
+              Continue
+            </Text>
+            <Text
+              modifiers={[
+                font({ size: 11, weight: 'semibold', design: 'rounded' }),
+                foregroundStyle(colors.text),
+                monospacedDigit(),
+                fixedSize({ horizontal: true, vertical: false }),
+              ]}>
+              {`${progress}%`}
+            </Text>
+          </>
+        ) : null}
+      </HStack>
+    </GlassEffectContainer>
+  );
+}
 
 const styles = StyleSheet.create({
   card: {
     width: '100%',
   },
-  cardImage: {
-    height: 196,
-    borderRadius: 22,
-    overflow: 'hidden',
-  },
-  cardContent: {
-    paddingTop: 12,
-    gap: 8,
-  },
-  titleHost: {
-  },
-  progressContainer: {
-    gap: 8,
-  },
-  progressTrack: {
-    height: 5,
-    borderRadius: 999,
-    overflow: 'hidden',
-  },
-  progressBar: {
-    height: '100%',
-    borderRadius: 999,
-  },
-  progressHost: {
+  host: {
+    backgroundColor: 'transparent',
   },
 });

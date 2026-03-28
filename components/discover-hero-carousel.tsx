@@ -1,25 +1,40 @@
-import { useEffect, useRef, useState } from 'react';
-import {
-  Animated,
-  Dimensions,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import { Host, Button, HStack, Spacer, Text, VStack } from '@expo/ui/swift-ui';
-import { buttonStyle, controlSize, font, foregroundStyle, frame, layoutPriority, lineLimit, multilineTextAlignment, tint } from '@expo/ui/swift-ui/modifiers';
+import { useEffect, useState } from 'react';
+import { Dimensions } from 'react-native';
 import { useRouter } from 'expo-router';
+import {
+  Button,
+  GlassEffectContainer,
+  HStack,
+  RoundedRectangle,
+  Spacer,
+  Text,
+  VStack,
+  ZStack,
+} from '@expo/ui/swift-ui';
+import {
+  buttonStyle,
+  controlSize,
+  fixedSize,
+  font,
+  foregroundStyle,
+  frame,
+  glassEffect,
+  layoutPriority,
+  lineLimit,
+  multilineTextAlignment,
+  offset,
+  padding,
+  tint,
+} from '@expo/ui/swift-ui/modifiers';
 import { Colors } from '@/constants/theme';
+import { getStoryDetail } from '@/constants/story-details';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 const { width } = Dimensions.get('window');
-const CARD_WIDTH = width;
-const CARD_GAP = 0;
-const HERO_WIDTH = Math.min(CARD_WIDTH * 0.76, 248);
+const CARD_WIDTH = width - 40;
+const HERO_WIDTH = Math.min(width * 0.76, 248);
 const HERO_HEIGHT = HERO_WIDTH / 0.92;
-const CARD_MIN_HEIGHT = HERO_HEIGHT + 108;
+
 export interface DiscoverHeroItem {
   id: string;
   title: string;
@@ -33,9 +48,7 @@ interface DiscoverHeroCarouselProps {
 
 export function DiscoverHeroCarousel({ items }: DiscoverHeroCarouselProps) {
   const router = useRouter();
-  const scrollViewRef = useRef<any>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const scrollX = useRef(new Animated.Value(0)).current;
   const theme = useColorScheme() === 'dark' ? 'dark' : 'light';
   const colors = Colors[theme];
 
@@ -43,179 +56,138 @@ export function DiscoverHeroCarousel({ items }: DiscoverHeroCarouselProps) {
     if (items.length <= 1) return;
 
     const interval = setInterval(() => {
-      const nextIndex = (currentIndex + 1) % items.length;
-      scrollViewRef.current?.scrollTo({ x: nextIndex * (CARD_WIDTH + CARD_GAP), animated: true });
-      setCurrentIndex(nextIndex);
+      setCurrentIndex((value) => (value + 1) % items.length);
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [currentIndex, items.length]);
-
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const offsetX = event.nativeEvent.contentOffset.x;
-    const index = Math.round(offsetX / (CARD_WIDTH + CARD_GAP));
-    setCurrentIndex(index);
-  };
+  }, [items.length]);
 
   if (items.length === 0) return null;
 
+  const item = items[currentIndex];
+  const story = getStoryDetail(item.id);
+  const heroFill =
+    story
+      ? {
+          type: 'linearGradient' as const,
+          colors: story.cover.colors,
+          startPoint: { x: 0, y: 0 },
+          endPoint: { x: 1, y: 1 },
+        }
+      : colors.placeholder;
+
   return (
-    <View style={styles.container}>
-      <Animated.ScrollView
-        ref={scrollViewRef}
-        horizontal
-        decelerationRate="fast"
-        snapToInterval={CARD_WIDTH + CARD_GAP}
-        snapToAlignment="start"
-        disableIntervalMomentum
-        showsHorizontalScrollIndicator={false}
-        scrollEventThrottle={16}
-        contentContainerStyle={styles.scrollContent}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-          { useNativeDriver: true, listener: handleScroll }
-        )}>
-        {items.map((item, index) => {
-          const inputRange = [
-            (index - 1) * (CARD_WIDTH + CARD_GAP),
-            index * (CARD_WIDTH + CARD_GAP),
-            (index + 1) * (CARD_WIDTH + CARD_GAP),
-          ];
+    <VStack spacing={14} alignment="leading" modifiers={[padding({ horizontal: 20 })]}>
+      <Button
+        onPress={() => router.push(`/story/${item.id}`)}
+        modifiers={[buttonStyle('plain')]}>
+        <VStack spacing={0} alignment="leading">
+          <ZStack
+            alignment="bottom"
+            modifiers={[frame({ width: CARD_WIDTH, alignment: 'leading' }), padding({ bottom: 18 })]}>
+            <ZStack
+              alignment="center"
+              modifiers={[
+                frame({ width: HERO_WIDTH, height: HERO_HEIGHT, alignment: 'center' }),
+                padding({ bottom: 72 }),
+              ]}>
+              <RoundedRectangle
+                cornerRadius={34}
+                modifiers={[
+                  frame({ width: HERO_WIDTH, height: HERO_HEIGHT }),
+                  foregroundStyle(heroFill),
+                ]}
+              />
+              <RoundedRectangle
+                cornerRadius={30}
+                modifiers={[
+                  frame({ width: HERO_WIDTH - 10, height: HERO_HEIGHT - 10 }),
+                  foregroundStyle({
+                    type: 'linearGradient',
+                    colors: ['rgba(255,255,255,0.12)', 'rgba(255,255,255,0.02)'],
+                    startPoint: { x: 0, y: 0 },
+                    endPoint: { x: 1, y: 1 },
+                  }),
+                ]}
+              />
+            </ZStack>
 
-          const translateY = scrollX.interpolate({
-            inputRange,
-            outputRange: [10, 0, 10],
-            extrapolate: 'clamp',
-          });
-
-          return (
-            <TouchableOpacity
-              key={item.id}
-              activeOpacity={0.92}
-              style={styles.slide}
-              onPress={() => router.push(`/story/${item.id}`)}>
-              <Animated.View
-                style={[
-                  styles.card,
-                  { transform: [{ translateY }] },
-                ]}>
-                <View
-                  style={[
-                    styles.heroImage,
-                    {
-                      backgroundColor: colors.placeholder,
-                      shadowColor: colors.shadow,
+            <GlassEffectContainer spacing={20}>
+              <VStack
+                spacing={10}
+                alignment="leading"
+                modifiers={[
+                  frame({ maxWidth: Infinity, alignment: 'leading' }),
+                  padding({ horizontal: 20, vertical: 18 }),
+                  offset({ y: 10 }),
+                  glassEffect({
+                    glass: {
+                      variant: 'regular',
+                      tint: colors.glassTint,
                     },
-                  ]}
-                />
+                    shape: 'roundedRectangle',
+                    cornerRadius: 28,
+                  }),
+                ]}>
+                <Text
+                  modifiers={[
+                    font({ size: 15, weight: 'medium' }),
+                    foregroundStyle(colors.secondaryText),
+                    lineLimit(1),
+                  ]}>
+                  {item.subtitle}
+                </Text>
 
-                <Host style={[styles.footerHost, { backgroundColor: colors.background }]}>
-                  <VStack spacing={0} alignment="leading">
-                    <Text
-                      modifiers={[
-                        font({ size: 15, weight: 'medium' }),
-                        foregroundStyle(colors.secondaryText),
-                        lineLimit(1),
-                      ]}>
-                      {item.subtitle}
-                    </Text>
+                <HStack spacing={12} alignment="bottom">
+                  <Text
+                    modifiers={[
+                      font({ size: 26, weight: 'bold', design: 'rounded' }),
+                      foregroundStyle(colors.text),
+                      lineLimit(2),
+                      multilineTextAlignment('leading'),
+                      layoutPriority(1),
+                      frame({ maxWidth: 9999, alignment: 'leading' }),
+                    ]}>
+                    {item.title}
+                  </Text>
 
-                    <HStack spacing={12} alignment="bottom">
-                      <Text
-                        modifiers={[
-                          font({ size: 28, weight: 'bold', design: 'rounded' }),
-                          foregroundStyle(colors.text),
-                          lineLimit(2),
-                          multilineTextAlignment('leading'),
-                          layoutPriority(1),
-                          frame({ maxWidth: 9999, alignment: 'leading' }),
-                        ]}>
-                        {item.title}
-                      </Text>
+                  <Spacer />
 
-                      <Spacer />
+                  <Button
+                    onPress={() => router.push(`/chat?itemId=${item.id}`)}
+                    label="Read"
+                    modifiers={[
+                      buttonStyle('glassProminent'),
+                      controlSize('regular'),
+                      tint(item.accent),
+                      fixedSize({ horizontal: true, vertical: true }),
+                    ]}>
+                  </Button>
+                </HStack>
+              </VStack>
+            </GlassEffectContainer>
+          </ZStack>
+        </VStack>
+      </Button>
 
-                      <Button
-                        onPress={() => router.push(`/chat?itemId=${item.id}`)}
-                        label="Read"
-                        modifiers={[
-                          buttonStyle('borderedProminent'),
-                          controlSize('large'),
-                          tint(item.accent),
-                        ]}>
-                      </Button>
-                    </HStack>
-                  </VStack>
-                </Host>
-              </Animated.View>
-            </TouchableOpacity>
-          );
-        })}
-      </Animated.ScrollView>
-
-      {items.length > 1 && (
-        <View style={styles.paginationContainer}>
-          {items.map((_, index) => (
-            <View
-              key={index}
-              style={[
-                styles.dot,
-                { backgroundColor: colors.border },
-                currentIndex === index && { ...styles.activeDot, backgroundColor: colors.tint },
-              ]}
-            />
+      {items.length > 1 ? (
+        <HStack spacing={10} alignment="center" modifiers={[frame({ maxWidth: Infinity, alignment: 'center' }), padding({ top: 4 })]}>
+          {items.map((heroItem, index) => (
+            <Button
+              key={heroItem.id}
+              onPress={() => setCurrentIndex(index)}
+              modifiers={[buttonStyle('plain')]}>
+              <RoundedRectangle
+                cornerRadius={999}
+                modifiers={[
+                  frame({ width: currentIndex === index ? 34 : 11, height: 11 }),
+                  foregroundStyle(currentIndex === index ? colors.tint : colors.border),
+                ]}
+              />
+            </Button>
           ))}
-        </View>
-      )}
-    </View>
+        </HStack>
+      ) : null}
+    </VStack>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    gap: 0,
-  },
-  scrollContent: {
-    paddingHorizontal: 0,
-  },
-  slide: {
-    width: CARD_WIDTH,
-    marginRight: CARD_GAP,
-    minHeight: CARD_MIN_HEIGHT,
-  },
-  card: {
-    paddingTop: 4,
-    paddingBottom: 0,
-    paddingHorizontal: 20,
-    minHeight: CARD_MIN_HEIGHT,
-  },
-  heroImage: {
-    width: HERO_WIDTH,
-    aspectRatio: 0.92,
-    alignSelf: 'center',
-    marginBottom: 48,
-    borderRadius: 26,
-    shadowOffset: { width: 0, height: 16 },
-    shadowOpacity: 0.16,
-    shadowRadius: 24,
-    elevation: 8,
-  },
-  footerHost: {
-    marginTop: 0,
-  },
-  paginationContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 10,
-    marginTop: 0,
-  },
-  dot: {
-    width: 11,
-    height: 11,
-    borderRadius: 999,
-  },
-  activeDot: {
-    width: 34,
-  },
-});

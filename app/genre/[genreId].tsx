@@ -1,18 +1,17 @@
 import { StyleSheet, View } from 'react-native';
-import { Host, Button, HStack, ScrollView, Spacer, Text, VStack } from '@expo/ui/swift-ui';
+import { Host, Button, HStack, Spacer, Text, VStack } from '@expo/ui/swift-ui';
 import {
-  background,
   buttonStyle,
   fixedSize,
   font,
   foregroundStyle,
   frame,
   padding,
-  scrollContentBackground,
 } from '@expo/ui/swift-ui/modifiers';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { GenreStoryRow } from '@/components/genre-story-row';
+import { NavigationBackButton } from '@/components/navigation-back-button';
+import { TabScrollScreen } from '@/components/tab-scroll-screen';
 import { genreDetailMap } from '@/constants/genre-details';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -20,7 +19,6 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 export default function GenreDetailScreen() {
   const { genreId } = useLocalSearchParams<{ genreId: string }>();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const theme = useColorScheme() === 'dark' ? 'dark' : 'light';
   const fallbackColors = Colors[theme];
   const genre = genreId ? genreDetailMap[genreId] : undefined;
@@ -61,83 +59,49 @@ export default function GenreDetailScreen() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor }]}>
+    <>
       <Stack.Screen options={{ headerShown: false }} />
-      <Host useViewportSizeMeasurement colorScheme={theme} style={styles.host}>
-        <ScrollView
-          showsIndicators={false}
-          modifiers={[
-            background(backgroundColor),
-            scrollContentBackground('hidden'),
-          ]}>
-          <VStack
-            spacing={20}
-            alignment="leading"
+      <TabScrollScreen backgroundColor={backgroundColor} contentSpacing={20} horizontalPadding={16} bottomPadding={44}>
+        <HStack spacing={14} alignment="center" modifiers={[frame({ maxWidth: Infinity, alignment: 'leading' })]}>
+          <NavigationBackButton color={titleColor} onPress={() => router.back()} />
+
+          <Text
             modifiers={[
-              frame({ maxWidth: Infinity, alignment: 'leading' }),
-              padding({
-                top: 0,
-                bottom: insets.bottom + 44,
-                horizontal: 16,
-              }),
+              font({ size: 30, weight: 'bold', design: 'rounded' }),
+              foregroundStyle(titleColor),
+              fixedSize({ horizontal: false, vertical: true }),
             ]}>
-            <HStack spacing={14} alignment="center" modifiers={[frame({ maxWidth: Infinity, alignment: 'leading' })]}>
-              <Button onPress={() => router.back()} modifiers={[buttonStyle('plain')]}>
-                <HStack spacing={8} alignment="center">
-                  <Text
-                    modifiers={[
-                      font({ size: 22, weight: 'bold', design: 'rounded' }),
-                      foregroundStyle(titleColor),
-                      fixedSize({ horizontal: true, vertical: true }),
-                    ]}>
-                    ←
-                  </Text>
-                </HStack>
-              </Button>
+            {genre.title}
+          </Text>
 
-              <Text
-                modifiers={[
-                  font({ size: 30, weight: 'bold', design: 'rounded' }),
-                  foregroundStyle(titleColor),
-                  fixedSize({ horizontal: false, vertical: true }),
-                ]}>
-                {genre.title}
-              </Text>
+          <Spacer />
+        </HStack>
 
-              <Spacer />
-            </HStack>
-
-            <VStack spacing={12} alignment="leading" modifiers={[frame({ maxWidth: Infinity, alignment: 'leading' })]}>
-              {genre.stories.map((story) => (
-                <GenreStoryRow
-                  key={story.id}
-                  item={story}
-                  accentColor={genre.accentColor}
-                  cardColor={cardColor}
-                  titleColor={titleColor}
-                  subtitleColor={subtitleColor}
-                  bodyColor={bodyColor}
-                  iconColor={iconColor}
-                  metricColor={metricColor}
-                  progressTrackColor={progressTrackColor}
-                  onPress={() => router.push(`/story/${story.id}`)}
-                />
-              ))}
-            </VStack>
-          </VStack>
-        </ScrollView>
-      </Host>
-    </View>
+        <VStack spacing={12} alignment="leading" modifiers={[frame({ maxWidth: Infinity, alignment: 'leading' })]}>
+          {genre.stories.map((story) => (
+            <GenreStoryRow
+              key={story.id}
+              item={story}
+              accentColor={genre.accentColor}
+              cardColor={cardColor}
+              titleColor={titleColor}
+              subtitleColor={subtitleColor}
+              bodyColor={bodyColor}
+              iconColor={iconColor}
+              metricColor={metricColor}
+              progressTrackColor={progressTrackColor}
+              onPress={() => router.push(`/story/${story.id}`)}
+            />
+          ))}
+        </VStack>
+      </TabScrollScreen>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  host: {
-    flex: 1,
-    backgroundColor: 'transparent',
   },
   emptyHost: {
     flex: 1,
