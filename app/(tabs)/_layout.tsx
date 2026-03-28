@@ -18,8 +18,7 @@ export default function TabLayout() {
       }}
       backgroundColor={colors.tabBar}
       blurEffect="systemChromeMaterial"
-      shadowColor={colors.shadow}
-      disableTransparentOnScrollEdge>
+      shadowColor={colors.depthShadow}>
       <NativeTabs.Trigger name="discover">
         <NativeTabs.Trigger.Icon
           sf={{ default: 'sparkles', selected: 'sparkles' }}

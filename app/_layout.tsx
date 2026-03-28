@@ -16,7 +16,7 @@ export default function RootLayout() {
   const colorScheme = useColorScheme() === 'dark' ? 'dark' : 'light';
 
   useEffect(() => {
-    void SystemUI.setBackgroundColorAsync(Colors[colorScheme].background);
+    void SystemUI.setBackgroundColorAsync(Colors[colorScheme].baseCanvas);
   }, [colorScheme]);
 
   const navigationTheme =
@@ -25,8 +25,8 @@ export default function RootLayout() {
           ...DarkTheme,
           colors: {
             ...DarkTheme.colors,
-            background: Colors.dark.background,
-            card: Colors.dark.tabBar,
+            background: Colors.dark.baseCanvas,
+            card: Colors.dark.glassRegular,
             primary: Colors.dark.tint,
             text: Colors.dark.text,
             border: Colors.dark.border,
@@ -37,8 +37,8 @@ export default function RootLayout() {
           ...DefaultTheme,
           colors: {
             ...DefaultTheme.colors,
-            background: Colors.light.background,
-            card: Colors.light.tabBar,
+            background: Colors.light.baseCanvas,
+            card: Colors.light.glassRegular,
             primary: Colors.light.tint,
             text: Colors.light.text,
             border: Colors.light.border,
@@ -53,7 +53,7 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="genre/[genreId]" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="story/[storyId]" options={{ animation: 'slide_from_right' }} />
-        <Stack.Screen name="chat" options={{ presentation: 'modal', title: 'Story Chat' }} />
+        <Stack.Screen name="chat" options={{ animation: 'slide_from_right', title: 'Story Chat' }} />
       </Stack>
       <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
     </ThemeProvider>
