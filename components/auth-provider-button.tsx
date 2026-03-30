@@ -1,5 +1,5 @@
-import { Button, HStack, Image, Spacer, Text, ZStack } from '@expo/ui/swift-ui';
-import { background, border, buttonStyle, font, foregroundStyle, frame, opacity, padding, shapes, shadow } from '@expo/ui/swift-ui/modifiers';
+import { Button, GlassEffectContainer, HStack, Image, Spacer, Text, ZStack } from '@expo/ui/swift-ui';
+import { buttonStyle, font, foregroundStyle, frame, glassEffect, lineLimit, opacity, padding } from '@expo/ui/swift-ui/modifiers';
 
 interface AuthProviderButtonProps {
   provider: 'google' | 'apple';
@@ -17,60 +17,65 @@ export function AuthProviderButton({
   const palette =
     appearance === 'dark'
       ? {
-          backgroundColor: 'rgba(43, 49, 78, 0.92)',
           textColor: '#ECECF5',
-          shadowColor: 'rgba(6, 8, 18, 0.2)',
-          borderColor: 'rgba(255, 255, 255, 0.06)',
+          glassTint: 'rgba(154, 170, 224, 0.12)',
         }
       : {
-          backgroundColor: '#FFFFFF',
           textColor: '#171C2E',
-          shadowColor: 'rgba(74, 53, 106, 0.12)',
-          borderColor: 'rgba(88, 70, 122, 0.10)',
+          glassTint: 'rgba(255, 255, 255, 0.2)',
         };
 
   return (
-    <Button
-      onPress={onPress}
-      modifiers={[
-        buttonStyle('plain'),
-        frame({ maxWidth: Infinity, height: 54, alignment: 'leading' }),
-      ]}>
+    <GlassEffectContainer spacing={12}>
       <HStack
-        spacing={12}
+        spacing={0}
         alignment="center"
         modifiers={[
-          frame({ maxWidth: Infinity, height: 54, alignment: 'leading' }),
-          padding({ horizontal: 20 }),
-          background(palette.backgroundColor, shapes.capsule()),
-          border({ color: palette.borderColor, width: 1 }),
-          shadow({ radius: 12, y: 8, color: palette.shadowColor }),
+          frame({ maxWidth: Infinity, height: 56, alignment: 'center' }),
+          glassEffect({
+            glass: {
+              variant: 'regular',
+              tint: palette.glassTint,
+            },
+            shape: 'capsule',
+          }),
         ]}>
-        <ProviderMark provider={provider} appearance={appearance} />
-
-        <Spacer minLength={0} />
-
-        <Text
+        <Button
+          onPress={onPress}
           modifiers={[
-          font({ size: 15, weight: 'bold', design: 'rounded' }),
-          foregroundStyle(palette.textColor),
-          frame({ maxWidth: Infinity, alignment: 'center' }),
+            buttonStyle('plain'),
+            frame({ maxWidth: Infinity, height: 56, alignment: 'leading' }),
+            padding({ horizontal: 18 }),
           ]}>
-          {label}
-        </Text>
+          <HStack spacing={12} alignment="center" modifiers={[frame({ maxWidth: Infinity, height: 56, alignment: 'leading' })]}>
+            <ProviderMark provider={provider} appearance={appearance} />
 
-        <Spacer minLength={0} />
+            <Spacer minLength={0} />
 
-        <Text
-          modifiers={[
-            font({ size: 1 }),
-            opacity(0),
-            frame({ width: 18, height: 18, alignment: 'center' }),
-          ]}>
-          .
-        </Text>
+            <Text
+              modifiers={[
+                font({ size: 15, weight: 'semibold', design: 'rounded' }),
+                foregroundStyle(palette.textColor),
+                lineLimit(1),
+                frame({ maxWidth: Infinity, alignment: 'center' }),
+              ]}>
+              {label}
+            </Text>
+
+            <Spacer minLength={0} />
+
+            <Text
+              modifiers={[
+                font({ size: 1 }),
+                opacity(0),
+                frame({ width: 18, height: 18, alignment: 'center' }),
+              ]}>
+              .
+            </Text>
+          </HStack>
+        </Button>
       </HStack>
-    </Button>
+    </GlassEffectContainer>
   );
 }
 
