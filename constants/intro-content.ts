@@ -17,8 +17,8 @@ export const introPalette = {
     footnote: '#656A81',
     legal: '#C95487',
     backgroundGradient: ['#3D1648', '#171A2B', '#111521'],
-    pinkGlow: ['rgba(255, 122, 214, 0.28)', 'rgba(255, 122, 214, 0)'],
-    blueGlow: ['rgba(88, 104, 255, 0.14)', 'rgba(88, 104, 255, 0)'],
+    pinkGlow: ['rgba(255, 122, 214, 0.22)', 'rgba(255, 122, 214, 0)'],
+    blueGlow: ['rgba(88, 104, 255, 0.1)', 'rgba(88, 104, 255, 0)'],
   },
   light: {
     screen: '#F4F1FA',
@@ -27,7 +27,7 @@ export const introPalette = {
     footnote: '#7A748D',
     legal: '#B43F76',
     backgroundGradient: ['#F2E9FF', '#ECEAF8', '#F8F4FF'],
-    pinkGlow: ['rgba(202, 79, 180, 0.18)', 'rgba(202, 79, 180, 0)'],
-    blueGlow: ['rgba(119, 139, 255, 0.1)', 'rgba(119, 139, 255, 0)'],
+    pinkGlow: ['rgba(202, 79, 180, 0.14)', 'rgba(202, 79, 180, 0)'],
+    blueGlow: ['rgba(119, 139, 255, 0.08)', 'rgba(119, 139, 255, 0)'],
   },
 };

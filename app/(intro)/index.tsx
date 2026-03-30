@@ -44,7 +44,7 @@ export default function IntroScreen() {
 
           <Circle
             modifiers={[
-              frame({ width: 280, height: 280 }),
+              frame({ width: 260, height: 260 }),
               foregroundStyle({
                 type: 'radialGradient',
                 colors: palette.pinkGlow,
@@ -53,14 +53,14 @@ export default function IntroScreen() {
                 endRadius: 140,
               }),
               offset({ x: 0, y: -360 }),
-              blur(18),
-              opacity(0.92),
+              blur(24),
+              opacity(0.82),
             ]}
           />
 
           <Circle
             modifiers={[
-              frame({ width: 320, height: 320 }),
+              frame({ width: 300, height: 300 }),
               foregroundStyle({
                 type: 'radialGradient',
                 colors: palette.blueGlow,
@@ -69,36 +69,38 @@ export default function IntroScreen() {
                 endRadius: 160,
               }),
               offset({ x: -110, y: -250 }),
-              blur(28),
+              blur(34),
+              opacity(0.84),
             ]}
           />
 
           <VStack
-            spacing={28}
+            spacing={30}
             alignment="center"
             modifiers={[
               frame({ maxWidth: Infinity, maxHeight: Infinity }),
               padding({
-                top: insets.top + 76,
-                bottom: Math.max(insets.bottom, 12) + 8,
-                horizontal: 22,
+                top: insets.top + 72,
+                bottom: Math.max(insets.bottom, 14) + 10,
+                horizontal: 24,
               }),
             ]}>
             <VStack
-              spacing={24}
+              spacing={22}
               alignment="center"
               modifiers={[frame({ maxWidth: Infinity })]}>
               <AuthAppLogo />
 
               <VStack
-                spacing={10}
+                spacing={8}
                 alignment="center"
                 modifiers={[
-                  padding({ top: 24 }),
+                  frame({ maxWidth: 320 }),
+                  padding({ top: 18 }),
                 ]}>
                 <Text
                   modifiers={[
-                    font({ size: 18, weight: 'bold', design: 'rounded' }),
+                    font({ size: 17, weight: 'semibold', design: 'rounded' }),
                     foregroundStyle(palette.title),
                   ]}>
                   {introCopy.appName}
@@ -114,7 +116,6 @@ export default function IntroScreen() {
                   modifiers={[
                     font({ size: 13, weight: 'medium', design: 'rounded' }),
                     foregroundStyle(palette.body),
-                    offset({ y: -4 }),
                   ]}>
                   {introCopy.headlineLines[1]}
                 </Text>
@@ -122,11 +123,10 @@ export default function IntroScreen() {
             </VStack>
 
             <VStack
-              spacing={14}
+              spacing={12}
               alignment="center"
               modifiers={[
-                frame({ maxWidth: Infinity }),
-                padding({ horizontal: 4 }),
+                frame({ maxWidth: 420 }),
               ]}>
               <AuthProviderButton
                 provider="google"
@@ -146,7 +146,7 @@ export default function IntroScreen() {
               spacing={0}
               alignment="center"
               modifiers={[frame({ maxWidth: Infinity, maxHeight: Infinity, alignment: 'bottom' })]}>
-              <VStack spacing={5} alignment="center">
+              <VStack spacing={4} alignment="center" modifiers={[frame({ maxWidth: 320 })]}>
                 <Text
                   modifiers={[
                     font({ size: 11, weight: 'medium', design: 'rounded' }),
