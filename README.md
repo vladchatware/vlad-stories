@@ -53,11 +53,11 @@ bun run android
 
 ## Project Structure
 
-- [`/Users/mac/Projects/vlad-stories/app`](/Users/mac/Projects/vlad-stories/app) routes and screen composition
-- [`/Users/mac/Projects/vlad-stories/components`](/Users/mac/Projects/vlad-stories/components) reusable UI components
-- [`/Users/mac/Projects/vlad-stories/constants`](/Users/mac/Projects/vlad-stories/constants) seeded story content, theme, and static product data
-- [`/Users/mac/Projects/vlad-stories/lib/chat-sdk`](/Users/mac/Projects/vlad-stories/lib/chat-sdk) `Chat SDK` integration and local state adapter
-- [`/Users/mac/Projects/vlad-stories/hooks`](/Users/mac/Projects/vlad-stories/hooks) screen and playthrough hooks
+- [`/app) routes and screen composition
+- [`/components) reusable UI components
+- [`/constants) seeded story content, theme, and static product data
+- [`/lib/chat-sdk) `Chat SDK` integration and local state adapter
+- [`/hooks) screen and playthrough hooks
 
 ## Interactive Story Architecture
 
