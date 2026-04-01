@@ -1,50 +1,107 @@
-# Welcome to your Expo app 👋
+# Vlad Stories
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+`Vlad Stories` is an iOS-first story app built with `Expo`, `expo-router`, `@expo/ui/swift-ui`, and `Chat SDK`.
 
-## Get started
+The app starts as an editorial story library and shifts into a chat-style playthrough once you enter a story. The goal is to make reading feel more atmospheric, more immediate, and more native to iOS than a generic text reader.
+
+Repository: [github.com/vladchatware/vlad-stories](https://github.com/vladchatware/vlad-stories)
+
+## Product
+
+- Curated discovery surfaces for story browsing
+- Story detail screens with editorial presentation
+- Chat-style narrative playthroughs with branching choices
+- Freeform reply input on selected beats
+- iOS-first visual language with restrained Liquid Glass chrome
+- Local narrative state modeled through chat threads and messages
+
+## Stack
+
+- `Expo`
+- `React Native`
+- `expo-router`
+- `@expo/ui`
+- `@expo/ui/swift-ui`
+- `chat`
+- TypeScript
+
+## Getting Started
 
 1. Install dependencies
 
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
 ```bash
-npm run reset-project
+bun install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+2. Start the dev server
 
-## Learn more
+```bash
+bunx expo start
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+3. Run iOS locally
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+bunx expo run:ios
+```
 
-## Join the community
+Useful scripts:
 
-Join our community of developers creating universal apps.
+```bash
+bun run lint
+bun run web
+bun run android
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Project Structure
+
+- [`/Users/mac/Projects/vlad-stories/app`](/Users/mac/Projects/vlad-stories/app) routes and screen composition
+- [`/Users/mac/Projects/vlad-stories/components`](/Users/mac/Projects/vlad-stories/components) reusable UI components
+- [`/Users/mac/Projects/vlad-stories/constants`](/Users/mac/Projects/vlad-stories/constants) seeded story content, theme, and static product data
+- [`/Users/mac/Projects/vlad-stories/lib/chat-sdk`](/Users/mac/Projects/vlad-stories/lib/chat-sdk) `Chat SDK` integration and local state adapter
+- [`/Users/mac/Projects/vlad-stories/hooks`](/Users/mac/Projects/vlad-stories/hooks) screen and playthrough hooks
+
+## Interactive Story Architecture
+
+The interactive story flow is intentionally modeled with chat primitives:
+
+- a story session maps to a thread
+- story beats map to transcript entries
+- suggestions map to authored branch points
+- freeform input can unlock on specific beats
+- local state and persistence are handled through a custom `Chat SDK` adapter
+
+Key files:
+
+- [`/Users/mac/Projects/vlad-stories/app/chat.tsx`](/Users/mac/Projects/vlad-stories/app/chat.tsx)
+- [`/Users/mac/Projects/vlad-stories/hooks/use-story-playthrough-controller.ts`](/Users/mac/Projects/vlad-stories/hooks/use-story-playthrough-controller.ts)
+- [`/Users/mac/Projects/vlad-stories/lib/chat-sdk/story-chat-instance.ts`](/Users/mac/Projects/vlad-stories/lib/chat-sdk/story-chat-instance.ts)
+- [`/Users/mac/Projects/vlad-stories/lib/chat-sdk/story-playthrough-adapter.ts`](/Users/mac/Projects/vlad-stories/lib/chat-sdk/story-playthrough-adapter.ts)
+- [`/Users/mac/Projects/vlad-stories/components/chat/local-story-playthrough-adapter.ts`](/Users/mac/Projects/vlad-stories/components/chat/local-story-playthrough-adapter.ts)
+
+## Notes on Expo UI + SwiftUI
+
+This project leans heavily on `@expo/ui/swift-ui`, which is still beta. The main implementation lesson so far has been that most hard problems are layout ownership problems, not styling problems.
+
+Things that worked better:
+
+- keeping screens inside a coherent SwiftUI-hosted layout tree
+- letting SwiftUI own more of the scroll and layout behavior
+- fixing safe-area and inset issues at the screen architecture level
+- using glass effects for chrome and controls, not to hide layout mistakes
+
+Things that worked worse:
+
+- mixing manual React Native safe-area math into SwiftUI-hosted screens
+- compensating for layout issues with extra padding and offset stacking
+- treating `NativeTabs` overlap and scroll edge behavior as spacing problems first
+
+## Status
+
+The current implementation is best described as an iOS-first product prototype with a real UI system, seeded content, and a working local interactive story engine.
+
+It is not yet a production backend or publishing platform.
+
+## License
+
+No license is currently defined in this repository. Do not assume commercial reuse rights without explicit permission.
