@@ -4,8 +4,6 @@
 
 The app starts as an editorial story library and shifts into a chat-style playthrough once you enter a story. The goal is to make reading feel more atmospheric, more immediate, and more native to iOS than a generic text reader.
 
-Repository: [github.com/vladchatware/vlad-stories](https://github.com/vladchatware/vlad-stories)
-
 ## Product
 
 - Curated discovery surfaces for story browsing
