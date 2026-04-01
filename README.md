@@ -53,11 +53,11 @@ bun run android
 
 ## Project Structure
 
-- [`/app) routes and screen composition
-- [`/components) reusable UI components
-- [`/constants) seeded story content, theme, and static product data
-- [`/lib/chat-sdk) `Chat SDK` integration and local state adapter
-- [`/hooks) screen and playthrough hooks
+- `/app` routes and screen composition
+- `/components` reusable UI components
+- `/constants` seeded story content, theme, and static product data
+- `/lib/chat-sdk` `Chat SDK` integration and local state adapter
+- `/hooks` screen and playthrough hooks
 
 ## Interactive Story Architecture
 
@@ -68,14 +68,6 @@ The interactive story flow is intentionally modeled with chat primitives:
 - suggestions map to authored branch points
 - freeform input can unlock on specific beats
 - local state and persistence are handled through a custom `Chat SDK` adapter
-
-Key files:
-
-- [`/Users/mac/Projects/vlad-stories/app/chat.tsx`](/Users/mac/Projects/vlad-stories/app/chat.tsx)
-- [`/Users/mac/Projects/vlad-stories/hooks/use-story-playthrough-controller.ts`](/Users/mac/Projects/vlad-stories/hooks/use-story-playthrough-controller.ts)
-- [`/Users/mac/Projects/vlad-stories/lib/chat-sdk/story-chat-instance.ts`](/Users/mac/Projects/vlad-stories/lib/chat-sdk/story-chat-instance.ts)
-- [`/Users/mac/Projects/vlad-stories/lib/chat-sdk/story-playthrough-adapter.ts`](/Users/mac/Projects/vlad-stories/lib/chat-sdk/story-playthrough-adapter.ts)
-- [`/Users/mac/Projects/vlad-stories/components/chat/local-story-playthrough-adapter.ts`](/Users/mac/Projects/vlad-stories/components/chat/local-story-playthrough-adapter.ts)
 
 ## Notes on Expo UI + SwiftUI
 
